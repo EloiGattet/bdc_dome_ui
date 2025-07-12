@@ -87,13 +87,42 @@ void drawMenu(uint8_t idx) {
   Serial.println("Menu refresh");
 }
 
+void neopixelBootAnimation() {
+  // Effet rainbow tournant
+  for (int t = 0; t < 2 * NEOPIXEL_NUM; t++) {
+    for (int i = 0; i < NEOPIXEL_NUM; i++) {
+      uint32_t color = ring.ColorHSV((uint16_t)((i * 65536 / NEOPIXEL_NUM) + t * 4000) % 65536, 255, 128);
+      ring.setPixelColor(i, color);
+    }
+    ring.show();
+    delay(30);
+  }
+  // Flashs blancs rapides
+  for (int f = 0; f < 3; f++) {
+    for (int i = 0; i < NEOPIXEL_NUM; i++) ring.setPixelColor(i, ring.Color(80, 80, 80));
+    ring.show();
+    delay(60);
+    ring.clear(); ring.show();
+    delay(60);
+  }
+  // Effet "remplissage" vert
+  for (int i = 0; i < NEOPIXEL_NUM; i++) {
+    ring.setPixelColor(i, ring.Color(0, 80, 0));
+    ring.show();
+    delay(18);
+  }
+  delay(120);
+  ring.clear(); ring.show();
+}
+
 void splashScreen() {
   display.clearDisplay();
   display.setTextColor(BLACK);
   display.setCursor(0, 0);
   display.drawBitmap(0, 0, epd_bitmap_Logo_Mercurio, 84, 48, BLACK);
   display.display();
-  delay(2000);
+  neopixelBootAnimation();
+  delay(1200);
 }
 
 // --- Paramètres d'acquisition (valeurs par défaut, à remplacer par lecture EEPROM plus tard) ---
@@ -212,12 +241,13 @@ void acquisitionCountdown() {
     display.setTextSize(1);
     display.display();
 
-    // Affichage temps restant sur display7seg (mm:ss)
+    // Affichage temps restant sur display7seg (mm:ss) avec clignotement du séparateur
     tempsRestantMs = tempsTotalMs - (millis() - debut);
     uint16_t secRest = tempsRestantMs / 1000;
     uint8_t min = secRest / 60;
     uint8_t sec = secRest % 60;
-    display7seg.showNumberDecEx(min * 100 + sec, 0b01000000, true); // mm:ss
+    bool showColon = ((sec % 2) == 0); // clignote chaque seconde
+    display7seg.showNumberDecEx(min * 100 + sec, showColon ? 0b01000000 : 0, true);
 
     // Allume la LED i via le 74HC595
     digitalWrite(latchPin, LOW);
@@ -239,6 +269,14 @@ void acquisitionCountdown() {
         display7seg.clear();
         return;
       }
+      // Rafraîchit le display7seg chaque seconde
+      unsigned long elapsed = millis() - debut;
+      bool showColon = (((elapsed/1000) % 2) == 0);
+      tempsRestantMs = tempsTotalMs - elapsed;
+      secRest = tempsRestantMs / 1000;
+      min = secRest / 60;
+      sec = secRest % 60;
+      display7seg.showNumberDecEx(min * 100 + sec, showColon ? 0b01000000 : 0, true);
       delay(5);
     }
 
@@ -255,6 +293,14 @@ void acquisitionCountdown() {
         display7seg.clear();
         return;
       }
+      // Rafraîchit le display7seg chaque seconde
+      unsigned long elapsed = millis() - debut;
+      bool showColon = (((elapsed/1000) % 2) == 0);
+      tempsRestantMs = tempsTotalMs - elapsed;
+      secRest = tempsRestantMs / 1000;
+      min = secRest / 60;
+      sec = secRest % 60;
+      display7seg.showNumberDecEx(min * 100 + sec, showColon ? 0b01000000 : 0, true);
       delay(5);
     }
   }
@@ -543,7 +589,7 @@ void drawReglageMenu(uint8_t idx) {
 }
 
 // --- Sous-sous-menu édition réglage générique ---
-void drawEditValue(const char* titre, int value, const char* unite, bool showArrows = true) {
+void drawEditValue(const char* titre, int value, const char* unite, bool showArrows, int editIdx) {
   display.clearDisplay();
   display.setTextColor(BLACK);
   display.setTextSize(1);
@@ -552,16 +598,30 @@ void drawEditValue(const char* titre, int value, const char* unite, bool showArr
   display.getTextBounds(titre, 0, 0, &x1, &y1, &w, &h);
   display.setCursor((84-w)/2, 0);
   display.print(titre);
+  display.drawFastHLine(0, 9, 84, BLACK);
   display.setTextSize(2);
   char buf[12];
-  sprintf(buf, "%d%s", value, unite ? unite : "");
+  if (editIdx == 0) { // tps/LED : afficher en secondes
+    float sec = value / 1000.0f;
+    dtostrf(sec, 3, 1, buf);
+    for (char* p = buf; *p; ++p) if (*p == '.') *p = ',';
+    strcat(buf, "s");
+  } else {
+    sprintf(buf, "%d%s", value, unite ? unite : "");
+  }
   display.getTextBounds(buf, 0, 0, &x1, &y1, &w, &h);
   int valX = (84-w)/2;
+  int arrowOffset = 12;
+  if (showArrows) {
+    display.setCursor(valX - arrowOffset, 18);
+    display.print("<");
+  }
   display.setCursor(valX, 18);
-  if (showArrows) display.print("<");
-  display.setCursor(valX+12, 18);
   display.print(buf);
-  if (showArrows) display.setCursor(valX+12+w, 18), display.print(">");
+  if (showArrows) {
+    display.setCursor(valX + w, 18);
+    display.print(">");
+  }
   display.setTextSize(1);
   display.display();
 }
@@ -667,11 +727,11 @@ void loop() {
     if (droite && !lastDroite) { reglageIdx = (reglageIdx+1) % reglageLength; drawReglageMenu(reglageIdx); }
     if (entree && !lastEntree) {
       if (reglageIdx == 0) { // Temps LED
-        inEditValue = true; editIdx = 0; editValue = reglage.tempsParLedMs; editMin = 100; editMax = 5000; editStep = 100; editTitre = "TPS/LED"; editUnite = "ms"; drawEditValue(editTitre, editValue, editUnite);
+        inEditValue = true; editIdx = 0; editValue = reglage.tempsParLedMs; editMin = 100; editMax = 5000; editStep = 100; editTitre = "TPS/LED"; editUnite = "ms"; drawEditValue(editTitre, editValue, editUnite, true, editIdx);
       } else if (reglageIdx == 1) { // Stab LED
-        inEditValue = true; editIdx = 1; editValue = reglage.tempsStabLedMs; editMin = 50; editMax = 2000; editStep = 50; editTitre = "STAB LED"; editUnite = "ms"; drawEditValue(editTitre, editValue, editUnite);
+        inEditValue = true; editIdx = 1; editValue = reglage.tempsStabLedMs; editMin = 50; editMax = 2000; editStep = 50; editTitre = "STAB LED"; editUnite = "ms"; drawEditValue(editTitre, editValue, editUnite, true, editIdx);
       } else if (reglageIdx == 2) { // Contraste
-        inEditValue = true; editIdx = 2; editValue = reglage.contraste; editMin = 10; editMax = 100; editStep = 5; editTitre = "CONTRASTE"; editUnite = NULL; drawEditValue(editTitre, editValue, editUnite);
+        inEditValue = true; editIdx = 2; editValue = reglage.contraste; editMin = 10; editMax = 100; editStep = 5; editTitre = "CONTRASTE"; editUnite = NULL; drawEditValue(editTitre, editValue, editUnite, true, editIdx);
       } else if (reglageIdx == 3) { // Buzzer
         inEditValue = true; editIdx = 3; editBool = reglage.buzzerOn; editTitre = "BUZZER"; drawEditBool(editTitre, editBool);
       } else if (reglageIdx == 4) { // Neopixel
@@ -683,8 +743,8 @@ void loop() {
     lastEntree = entree;
   } else if (inReglageMenu && inEditValue) {
     if (editIdx <= 2) { // Edition valeur numérique
-      if (gauche && !lastGauche) { editValue -= editStep; if (editValue < editMin) editValue = editMax; drawEditValue(editTitre, editValue, editUnite); }
-      if (droite && !lastDroite) { editValue += editStep; if (editValue > editMax) editValue = editMin; drawEditValue(editTitre, editValue, editUnite); }
+      if (gauche && !lastGauche) { editValue -= editStep; if (editValue < editMin) editValue = editMax; drawEditValue(editTitre, editValue, editUnite, true, editIdx); }
+      if (droite && !lastDroite) { editValue += editStep; if (editValue > editMax) editValue = editMin; drawEditValue(editTitre, editValue, editUnite, true, editIdx); }
       if (entree && !lastEntree) {
         if (editIdx == 0) reglage.tempsParLedMs = editValue;
         else if (editIdx == 1) reglage.tempsStabLedMs = editValue;
