@@ -1,5 +1,31 @@
 # Module de contrôle dôme — Arduino Nano
 
+## Structure du code (2024)
+
+- **main.cpp** : Logique de navigation principale (états, setup/loop, transitions entre menus)
+- **menus.cpp / menus.h** : Tableaux de chaînes pour tous les menus (centralisation DRY)
+- **acquisition.cpp** : Affichage et logique du sous-menu Acquisition
+- **tests.cpp** : Affichage et logique du sous-menu Tests (inclut tous les tests matériels)
+- **reglages.cpp** : Affichage et logique du sous-menu Réglages (édition des paramètres)
+- **affichage.cpp** : Fonctions d'affichage génériques (drawMenu, drawMenuTitle, splashScreen...)
+- **hardware.cpp** : Initialisation et gestion des pins, objets globaux (écran, ring, 7 segments...)
+- **logo.cpp** : Bitmap du logo Mercurio
+
+**Centralisation DRY** :
+- Tous les tableaux de chaînes de menu sont définis une seule fois dans `menus.cpp` et accessibles partout via `menus.h` (avec `extern`).
+- Les sous-menus sont dans des fichiers dédiés, chaque module gère uniquement son affichage et ses actions.
+
+**Navigation** :
+- La logique de navigation (états, transitions, gestion des boutons) reste dans `main.cpp`.
+- Les sous-menus sont appelés via des fonctions dédiées (ex : `drawTestMenu`, `drawReglageMenu`, etc.).
+
+## Instructions de compilation
+
+- Utiliser PlatformIO (recommandé)
+- Commande : `platformio run` pour compiler, `platformio run --target upload` pour flasher
+- Toutes les dépendances sont gérées automatiquement (voir platformio.ini)
+- Si ajout de nouveaux menus : ajouter les chaînes dans `menus.cpp` et les déclarer dans `menus.h`
+
 ## Affectation des pins
 
 | Fonction         | Pin Arduino |
@@ -53,7 +79,8 @@
 - Adafruit GFX Library
 - Adafruit PCD8544 Nokia 5110 LCD library
 - Adafruit NeoPixel (si utilisé)
+- TM1637Display
 
 ---
 
-Pour toute modification hardware, adapter le mapping dans `src/main.cpp` et ce README. 
+Pour toute modification hardware, adapter le mapping dans `src/hardware.cpp` et ce README. 
