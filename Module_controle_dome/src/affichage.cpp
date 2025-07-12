@@ -7,7 +7,7 @@ void drawMenuTitle(const char* titre) {
   display.getTextBounds(titre, 0, 0, &x1, &y1, &w, &h);
   display.setCursor((84-w)/2, 0);
   display.print(titre);
-  display.drawFastHLine(0, 9, 84, BLACK);
+  display.drawFastHLine(0, 8, 84, BLACK);
 }
 
 void drawMenu(uint8_t idx) {
@@ -17,7 +17,7 @@ void drawMenu(uint8_t idx) {
   extern const char* menuItems[];
   extern const uint8_t menuLength;
   for (uint8_t i = 0; i < menuLength; i++) {
-    display.setCursor(0, 12 + i * 10);
+    display.setCursor(0, 12 + i * 10); // Décalage de 2px vers le haut
     if (i == idx) {
       display.print("> ");
       display.print(menuItems[i]);
