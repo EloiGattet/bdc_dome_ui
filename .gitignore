@@ -1,0 +1,38 @@
+doc/domesUI
+
+# Global ignores pour le projet
+# PlatformIO/Arduino
+.pio/
+build/
+libdeps/
+.DS_Store
+*.elf
+*.bin
+*.hex
+*.map
+*.dmp
+*.pyc
+*.pyo
+__pycache__/
+.vscode/
+
+# Python
+*.pyc
+*.pyo
+__pycache__/
+.env
+.venv
+venv/
+ENV/
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Autres
+*.swp
+*.swo
