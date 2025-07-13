@@ -6,10 +6,11 @@ ICONS_PATH = os.path.join(os.path.dirname(__file__), "icons")
 ACQ_PATH = os.path.join(os.path.dirname(__file__), "acquisitions")
 
 class ProjectsWindow(tk.Toplevel):
-    def __init__(self, master=None, windowed=False):
+    def __init__(self, master=None, windowed=False, mock=False):
         super().__init__(master)
         self.title("Voir les acquisitions")
         self.configure(bg="#212121")
+        self.mock = mock
         if windowed:
             self.geometry("800x480")
         else:
@@ -26,6 +27,9 @@ class ProjectsWindow(tk.Toplevel):
         # Titre en haut
         label_title = tk.Label(self, text="Acquisitions", bg="#212121", fg="#FFF3AE", font=("Roboto Mono", 28, "bold"))
         label_title.place(relx=0.5, y=30, anchor="n")
+        if self.mock:
+            label_mock = tk.Label(self, text="MODE SIMULATION (MOCK)", bg="#E53935", fg="#FFF", font=("Roboto Mono", 14, "bold"))
+            label_mock.place(relx=0.5, y=70, anchor="n")
 
         # Bouton retour en haut à gauche
         btn_retour = tk.Button(self, image=self.icon_retour, bg="#212121", activebackground="#212121", borderwidth=0, relief="flat", command=self.destroy, cursor="tcross", highlightthickness=0)

@@ -63,5 +63,5 @@ void splashScreen() {
   display.drawBitmap(0, 0, epd_bitmap_Logo_Mercurio, 84, 48, BLACK);
   display.display();
   neopixelBootAnimation();
-  delay(1200);
+  delay(500);
 } 
