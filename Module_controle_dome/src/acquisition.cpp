@@ -34,10 +34,10 @@ void acquisitionCountdown() {
     delay(10);
   }
 
-  display7seg.setBrightness(0x08); // Pulse moins fort
+  display7seg.setBrightness(0x0F);
 
   // Compte à rebours 3s avec pulse plus doux
-  for (int s = 3; s > 0; s--) {
+  for (int s = 2; s > 0; s--) {
     display7seg.showNumberDec(s, true);
 
     // Pulse rouge plus doux et plus lent
