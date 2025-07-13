@@ -97,7 +97,7 @@ python main.py
 ---
 
 ## Auteurs / Contact
-- [Eloi Malet](mailto:eloi.malet@protonmail.com)
+- [Eloi Gattet]
 - [Projet Mercurio / Pompei]
 
 ---
