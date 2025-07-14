@@ -16,6 +16,7 @@ class MainMenu(tk.Tk):
         self.mock = mock
         if windowed:
             self.geometry("800x480")
+            self.resizable(False, False)
         else:
             self.attributes('-fullscreen', True)
         self._load_icons()
@@ -71,8 +72,8 @@ class MainMenu(tk.Tk):
             canvas.config(cursor="tcross")
             return canvas
 
-        btn_acq = make_btn(frame, self.icon_capture, "Capture", self.open_acquisition)
-        btn_proj = make_btn(frame, self.icon_projects, "Acquisitions", self.open_projects)
+        btn_acq = make_btn(frame, self.icon_capture, "Acquisition", self.open_acquisition)
+        btn_proj = make_btn(frame, self.icon_projects, "Projets", self.open_projects)
         btn_acq.grid(row=0, column=0, padx=40, pady=20)
         btn_proj.grid(row=0, column=1, padx=40, pady=20)
 

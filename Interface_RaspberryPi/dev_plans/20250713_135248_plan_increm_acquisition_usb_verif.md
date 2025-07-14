@@ -3,7 +3,7 @@
 **Date : 2025-07-13**
 
 ## Système de mock (simulation)
-- [ ] Ajouter un mode "mock" activable par un paramètre (ex: --mock ou MOCK=True)
+- [x] Ajouter un mode "mock" activable par un paramètre (ex: --mock ou MOCK=True)
 - [x] Permettre de combiner mock et windowed pour tests sur Mac/PC
 - [x] Afficher dans l’UI qu’on est en mode simulation
 - [x] Préparer les fonctions mock dans utils.py (connexion Arduino, commande, prise de photo)
@@ -11,11 +11,22 @@
 - [x] Simuler la prise de photo (pas de gphoto2, générer des images factices)
 - [x] Simuler les retours OK/erreurs
 - [x] Intégrer les mocks dans le flux d'acquisition (acquisition.py)
-- [ ] Ajouter des logs console (print/logging) à chaque étape clé pour le suivi/debug
+- [x] Ajouter des logs console (print/logging) à chaque étape clé pour le suivi/debug
+- [x] Séquence mock multi-étapes avec progress bar :
+    - [x] Vérification connexion série (progress bar courte, log)
+    - [x] Vérification connexion appareil photo (progress bar courte, log)
+    - [x] Prise de vue (progress bar, délai simulé, log)
+    - [x] Copie des photos (progress bar, délai simulé, log)
+    - [x] Vérification des données (progress bar, délai simulé, log)
+    - [x] Affichage du succès dans l’UI (pas de popup, message, fermeture auto)
 
 ## UI acquisition & flux photo
 - [x] Interface de capture avec progressbar, affichage photo XX/24, temps restant estimé (mock)
 - [x] Récupération/copie des photos depuis l'appareil photo après acquisition (squelette, UI, logs, intégration dans le flux réel)
+- [x] Mode windowed : toutes les fenêtres 800x480 non redimensionnables
+- [x] Gestion du conflit d'acquisition :
+    - [x] Affichage d'une bulle d'avertissement si acquisition déjà existante (UI)
+    - [x] Jamais bloquant : nouveau dossier suffixé (_2, _3, ...)
 
 ## Synthèse des besoins restants (PRD)
 - Acquisition complète (dialogue série Arduino + gphoto2, rangement, feedback)
