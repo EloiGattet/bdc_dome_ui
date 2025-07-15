@@ -13,6 +13,7 @@ class AcquisitionWindow(tk.Toplevel):
         self.title("Nouvelle acquisition")
         self.configure(bg="#212121")
         self.mock = mock
+        self.windowed = windowed
         if windowed:
             self.geometry("800x480")
             self.resizable(False, False)
@@ -27,7 +28,7 @@ class AcquisitionWindow(tk.Toplevel):
         self.icon_retour = ImageTk.PhotoImage(Image.open(os.path.join(ICONS_PATH, "IconeRetour.png")).resize((60, 60)))
         self.icon_left = ImageTk.PhotoImage(Image.open(os.path.join(ICONS_PATH, "left_triangle.png")).resize((40, 40)))
         self.icon_right = ImageTk.PhotoImage(Image.open(os.path.join(ICONS_PATH, "right_triangle.png")).resize((40, 40)))
-        self.icon_ok = ImageTk.PhotoImage(Image.open(os.path.join(ICONS_PATH, "Icon_On_Rapide.png")).resize((60, 60)))
+        self.icon_ok = ImageTk.PhotoImage(Image.open(os.path.join(ICONS_PATH, "camera.png")).resize((60, 60)))
 
     def _init_state(self):
         last = utils.load_last_acquisition()
@@ -109,17 +110,23 @@ class AcquisitionWindow(tk.Toplevel):
             idx += 1
         self.acq_dir = final_dir
         if self.mock:
-            self._mock_acquisition()
+            self._mock_acquisition(windowed=self.windowed)
         else:
-            self._real_acquisition()
+            self._real_acquisition(windowed=self.windowed)
         # self.destroy() supprimé : la fenêtre ne doit se fermer qu'en cas de succès explicite
 
-    def _show_acquisition_summary(self, base_dir, elapsed, n_photos):
+    def _show_acquisition_summary(self, base_dir, elapsed, n_photos, windowed=None):
         import os, time
         from tkinter import Toplevel, Label, Button
+        if windowed is None:
+            windowed = self.windowed
         summary_win = Toplevel(self)
         summary_win.title("Acquisition terminée")
-        summary_win.geometry("500x260")
+        if windowed:
+            summary_win.geometry("800x480")
+            summary_win.resizable(False, False)
+        else:
+            summary_win.attributes('-fullscreen', True)
         summary_win.configure(bg="#212121")
         Label(summary_win, text="Acquisition terminée !", bg="#212121", fg="#33B5E5", font=("Roboto Mono", 18, "bold")).pack(pady=10)
         Label(summary_win, text=f"Dossier : {os.path.basename(base_dir)}", bg="#212121", fg="#FFF3AE", font=("Roboto Mono", 14)).pack(pady=5)
@@ -146,16 +153,22 @@ class AcquisitionWindow(tk.Toplevel):
         Button(summary_win, text="FIN", bg="#33B5E5", fg="#212121", font=("Roboto Mono", 14, "bold"), command=go_menu, width=12).pack(pady=10)
         Button(summary_win, text="ACQUISITION SUIVANTE", bg="#FFF3AE", fg="#212121", font=("Roboto Mono", 14, "bold"), command=next_acq, width=20).pack(pady=5)
 
-    def _real_acquisition(self):
+    def _real_acquisition(self, windowed=None):
         import os, time, subprocess, glob, shutil
         from tkinter import Toplevel, Label, DoubleVar, StringVar
         from tkinter.ttk import Progressbar
+        if windowed is None:
+            windowed = self.windowed
         n_photos = 24
         base_dir = self.acq_dir
         os.makedirs(base_dir, exist_ok=True)
         win = Toplevel(self)
         win.title("Acquisition en cours")
-        win.geometry("500x280")
+        if windowed:
+            win.geometry("800x480")
+            win.resizable(False, False)
+        else:
+            win.attributes('-fullscreen', True)
         win.configure(bg="#212121")
         label_info = Label(win, text="Acquisition réelle", bg="#212121", fg="#FFF3AE", font=("Roboto Mono", 16, "bold"))
         label_info.pack(pady=10)
@@ -279,17 +292,23 @@ class AcquisitionWindow(tk.Toplevel):
         label_status.config(fg="#33B5E5")
         print(f"[ACQ] Acquisition réelle terminée dans {base_dir}")
         win.after(800, win.destroy)
-        self._show_acquisition_summary(base_dir, elapsed, n_photos)
+        self._show_acquisition_summary(base_dir, elapsed, n_photos, windowed=windowed)
 
-    def _retrieve_photos(self):
+    def _retrieve_photos(self, windowed=None):
         import os, time, glob, shutil
         from tkinter import Toplevel, Label, DoubleVar, StringVar
         from tkinter.ttk import Progressbar
+        if windowed is None:
+            windowed = self.windowed
         n_photos = 24
         # Fenêtre de progression
         win = Toplevel(self)
         win.title("Transfert des photos")
-        win.geometry("500x200")
+        if windowed:
+            win.geometry("800x480")
+            win.resizable(False, False)
+        else:
+            win.attributes('-fullscreen', True)
         win.configure(bg="#212121")
         label_info = Label(win, text=f"Transfert des photos...", bg="#212121", fg="#FFF3AE", font=("Roboto Mono", 16, "bold"))
         label_info.pack(pady=10)
@@ -336,16 +355,22 @@ class AcquisitionWindow(tk.Toplevel):
         else:
             self.label_warning.config(text="")
 
-    def _mock_acquisition(self):
+    def _mock_acquisition(self, windowed=None):
         import utils, os, time
         from tkinter import Toplevel, Label, DoubleVar, StringVar
         from tkinter.ttk import Progressbar
+        if windowed is None:
+            windowed = self.windowed
         n_photos = 24
         base_dir = self.acq_dir
         os.makedirs(base_dir, exist_ok=True)
         win = Toplevel(self)
         win.title("Acquisition en cours")
-        win.geometry("500x280")
+        if windowed:
+            win.geometry("800x480")
+            win.resizable(False, False)
+        else:
+            win.attributes('-fullscreen', True)
         win.configure(bg="#212121")
         label_info = Label(win, text="Acquisition simulée", bg="#212121", fg="#FFF3AE", font=("Roboto Mono", 16, "bold"))
         label_info.pack(pady=10)
@@ -435,7 +460,7 @@ class AcquisitionWindow(tk.Toplevel):
         label_status.config(fg="#33B5E5")
         print(f"[MOCK] Acquisition simulée terminée dans {base_dir}")
         win.after(800, win.destroy)
-        self._show_acquisition_summary(base_dir, elapsed, n_photos)
+        self._show_acquisition_summary(base_dir, elapsed, n_photos, windowed=windowed)
 
     def save_params(self):
         import utils
