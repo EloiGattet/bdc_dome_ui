@@ -15,7 +15,10 @@ class ProjectsWindow(tk.Toplevel):
             self.geometry("800x480")
             self.resizable(False, False)
         else:
+            self.geometry("800x480")
             self.attributes('-fullscreen', True)
+            self.overrideredirect(True)
+            self.resizable(False, False)
         self._load_icons()
         self._build_ui()
 
@@ -105,7 +108,10 @@ class ProjectsWindow(tk.Toplevel):
         import tkinter as tk
         import shutil
         win = tk.Toplevel(self)
+        win.geometry("800x480")
         win.attributes('-fullscreen', True)
+        win.overrideredirect(True)
+        win.resizable(False, False)
         win.configure(bg="#212121")
         label = tk.Label(win, text=f"Supprimer définitivement {len(items)} acquisition(s) ?\nCette action est irréversible.", bg="#212121", fg="#FFF3AE", font=("Roboto Mono", 22, "bold"))
         label.pack(pady=80)

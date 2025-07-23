@@ -18,7 +18,10 @@ class MainMenu(tk.Tk):
             self.geometry("800x480")
             self.resizable(False, False)
         else:
+            self.geometry("800x480")
             self.attributes('-fullscreen', True)
+            self.overrideredirect(True)
+            self.resizable(False, False)
         self._load_icons()
         self._build_ui()
 
@@ -39,9 +42,9 @@ class MainMenu(tk.Tk):
             label_mock = tk.Label(self, text="MODE SIMULATION (MOCK)", bg="#E53935", fg="#FFF", font=("Roboto Mono", 16, "bold"))
             label_mock.place(relx=0.5, y=y_mock, anchor="n")
         # Boutons éteindre/fermer en haut à droite
-        btn_shutdown = tk.Button(self, image=self.icon_shutdown, bg="#212121", activebackground="#212121", borderwidth=0, relief="flat", command=self.shutdown, cursor="tcross", highlightthickness=0)
+        btn_shutdown = tk.Button(self, image=self.icon_shutdown, bg="#212121", activebackground="#424242", borderwidth=0, relief="flat", command=self.shutdown, cursor="tcross", highlightthickness=0)
         btn_shutdown.place(relx=1.0, y=10, anchor="ne")
-        btn_close = tk.Button(self, image=self.icon_close, bg="#212121", activebackground="#212121", borderwidth=0, relief="flat", command=self.close_app, cursor="tcross", highlightthickness=0)
+        btn_close = tk.Button(self, image=self.icon_close, bg="#212121", activebackground="#424242", borderwidth=0, relief="flat", command=self.close_app, cursor="tcross", highlightthickness=0)
         btn_close.place(relx=1.0, y=80, anchor="ne")
         # Frame central pour les boutons
         frame = tk.Frame(self, bg="#212121")
@@ -67,8 +70,17 @@ class MainMenu(tk.Tk):
             canvas.create_image(BTN_W//2, 80, image=icon, anchor="center")
             # Texte centré sous l'image
             canvas.create_text(BTN_W//2, 165, text=text, font=FONT_BTN, fill=FG_BTN)
+            
+            # Effet hover
+            def on_enter(e):
+                canvas.configure(bg="#424242")  # Teinte plus claire au hover
+            def on_leave(e):
+                canvas.configure(bg=BG_BTN)  # Retour à la couleur normale
+            
             # Zone cliquable
             canvas.bind("<Button-1>", lambda e: command())
+            canvas.bind("<Enter>", on_enter)
+            canvas.bind("<Leave>", on_leave)
             canvas.config(cursor="tcross")
             return canvas
 
